@@ -50,4 +50,4 @@ app.*.map.json
 *.iml
 
 # Generated files
-lib/network/generated/
+lib/generated/

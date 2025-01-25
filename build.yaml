@@ -1,0 +1,11 @@
+targets:
+  $default:
+    sources:
+      - lib/**
+      - protos/**
+    builders:
+      protoc_builder:
+        options:
+          protoc:
+            # Generate both .pb.dart and .pbgrpc.dart files
+            generate_grpc: true

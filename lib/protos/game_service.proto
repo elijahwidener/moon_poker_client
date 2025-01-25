@@ -1,0 +1,84 @@
+syntax = "proto3";
+
+package moon_poker;
+
+
+
+
+
+service GameService {
+  rpc Authenticate(ConnectRequest) returns (ConnectResponse);
+  // Stream for sending game commands and receiving game state updates
+  rpc Connect(stream GameCommand) returns (stream GameUpdate);
+}
+
+message ConnectRequest {
+  int32 player_id = 1;
+  string auth_token = 2; // For future authentication
+}
+// TODO Look into using this or something else for authentication
+// Can pass along an auth token with commands to verify the player?
+
+message ConnectResponse {
+    bool success = 1;
+    string error_message = 2;  // Only populated if success = false
+    // Could add things like:
+    // string session_token = 3;
+    // uint64 server_time = 4;
+    // etc.
+}
+
+message GameCommand {
+  int32 player_id = 1; 
+  int32 sequence_number = 2;
+  CommandType type = 3;
+  oneof command_data {
+    JoinData join = 4;
+    RaiseData raise = 5;
+  }
+}
+
+message JoinData {
+  int64 stack = 1;
+}
+
+message RaiseData {
+  int64 amount = 1;
+}
+
+enum CommandType {
+  INVALID = 0;
+  JOIN = 1;
+  LEAVE = 2;
+  CHECK = 3;
+  CALL = 4;
+  RAISE = 5;
+  FOLD = 6;
+}
+
+message GameUpdate {
+  int32 sequence_number = 1;
+  GameSnapshot state = 2;
+  optional string error = 3;
+}
+
+message PlayerView {
+  uint64 player_id = 1;
+  int64 stack = 2;
+  int64 current_bet = 3;
+  bool is_folded = 4;
+  uint32 seat_position = 5;
+}
+
+message GameSnapshot {
+    repeated PlayerView players = 1;
+    repeated uint32 cards = 2;
+    int32 pot_size = 3;
+    int32 current_bet = 4;
+    int32 button = 5;
+    int32 current_player_position = 6;
+    bool is_game_active = 7;
+}
+
+
+
