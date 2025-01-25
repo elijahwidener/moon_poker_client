@@ -1,16 +1,109 @@
-# moon_poker_client
+# MoonPoker Client
 
-A new Flutter project.
+Flutter-based client application for MoonPoker, a real-time multiplayer poker platform.
 
-## Getting Started
+## Prerequisites
 
-This project is a starting point for a Flutter application.
+* **Flutter SDK** (latest stable)
+* **Dart SDK** (latest stable) 
+* **Protocol Buffer Compiler**
+* **MoonPoker Server** (for local development)
 
-A few resources to get you started if this is your first Flutter project:
+## Quick Start
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+```bash
+# Clone repository 
+git clone https://github.com/your-org/moon_poker_client.git
+cd moon_poker_client
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+# Install dependencies
+flutter pub get
+
+# Generate protocol buffers
+protoc --dart_out=grpc:lib/network/generated -I protos protos/*.proto
+
+# Run in debug mode
+flutter run
+```
+
+## Development Setup
+
+### Install Flutter
+
+#### macOS
+```bash
+brew install flutter
+```
+
+#### Linux
+```bash
+sudo snap install flutter --classic
+```
+
+#### Windows
+Download from flutter.dev
+
+### Install VS Code Extensions
+* Flutter
+* Dart
+* Error Lens
+
+### Configure Environment
+```bash
+flutter doctor
+flutter pub get
+```
+
+## Project Structure
+```
+lib/
+├── main.dart                 # Application entry
+├── network/                  # Network layer
+│   ├── network_controller.dart
+│   └── generated/           # Protocol buffer generated code
+├── ui/                      # UI components
+│   ├── controllers/
+│   ├── screens/
+│   └── widgets/
+└── models/                  # Data models
+```
+
+## Testing
+```bash
+# Run all tests
+flutter test
+
+# Run with coverage
+flutter test --coverage
+```
+
+## Contributing
+
+1. Create a feature branch:
+```bash
+git checkout -b feature/name
+```
+
+2. Commit changes:
+```bash
+git commit -m 'Add feature'
+```
+
+3. Push to remote:
+```bash
+git push origin feature/name
+```
+
+4. Create a Pull Request.
+
+## Running with Server
+
+1. Start MoonPoker server (default: `localhost:50051`).
+2. Run the client:
+```bash
+flutter run
+```
+
+## License
+
+This project is licensed under the MIT License.
