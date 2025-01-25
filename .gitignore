@@ -43,3 +43,11 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# IDE
+.idea/
+.vscode/
+*.iml
+
+# Generated files
+lib/network/generated/
