@@ -184,32 +184,37 @@ class _NetworkTestScreenState extends State<NetworkTestScreen> {
             Text('Status: $_connectionStatus',
                 style: Theme.of(context).textTheme.titleMedium),
             const SizedBox(height: 8),
-            Text ('Last Update: $_lastUpdate',
+            Text('Last Update: $_lastUpdate',
                 style: Theme.of(context).textTheme.bodyLarge),
-            const SizedBox(height:16),
-            Row(children: [
-              ElevatedButton(
-                onPressed: _networkController.isConnected ? null : _connect,
-                child: const Text('Connect'),
-              ),
-              const SizedBox(width: 8),
-              ElevatedButton(
-                onPressed: _networkController.isConnected ? _sendTestCommand : null,
-                child: const Text('Send Test Command'),
-              ),
-              const SizedBox(width: 8),
-              ElevatedButton(
-                onPressed: _networkController.isConnected ? _disconnect : null,
-                child: const Text('Disconnect'),
-              ),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                ElevatedButton(
+                  onPressed: _networkController.isConnected ? null : _connect,
+                  child: const Text('Connect'),
+                ),
+                const SizedBox(width: 8),
+                ElevatedButton(
+                  onPressed:
+                      _networkController.isConnected ? _sendTestCommand : null,
+                  child: const Text('Send Test Command'),
+                ),
+                const SizedBox(width: 8),
+                ElevatedButton(
+                  onPressed:
+                      _networkController.isConnected ? _disconnect : null,
+                  child: const Text('Disconnect'),
+                ),
               ],
-              )
-              const SizedBox(height: 16),
-              const Text('Game State:', style: TextStyle(fontWeight: FontWeight.bold)),
-              Text('Active Players: ${_currentState.players.where((p) => p.playerId != 0).length}'),
-              Text('Pot: ${_currentState.potSize}'),
-              Text('Current Bet: ${_currentState.currentBet}'),
-              Text('Game Active: ${_currentState.isGameActive}'),
+            ),
+            const SizedBox(height: 16),
+            const Text('Game State:',
+                style: TextStyle(fontWeight: FontWeight.bold)),
+            Text(
+                'Active Players: ${_currentState.players.where((p) => p.playerId != 0).length}'),
+            Text('Pot: ${_currentState.potSize}'),
+            Text('Current Bet: ${_currentState.currentBet}'),
+            Text('Game Active: ${_currentState.isGameActive}'),
           ],
         ),
       ),
