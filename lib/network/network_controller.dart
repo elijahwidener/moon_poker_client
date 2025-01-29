@@ -32,6 +32,7 @@ class NetworkController {
 
   /// Establish connection to server
   Future<void> connect({
+    required int clientId,
     String host = 'localhost',
     int port = 50051,
   }) async {
@@ -50,9 +51,15 @@ class NetworkController {
       );
       _stub = GameServiceClient(_channel);
 
+      final metadata = {
+        'client_id': clientId.toString(),
+      };
+      final options = CallOptions(metadata: metadata);
+
       // Start bidirectional stream
       _commandController = StreamController<GameCommand>();
-      _responseStream = _stub.connect(_commandController.stream);
+      _responseStream =
+          _stub.connect(_commandController.stream, options: options);
 
       // Listen for server updates
       _responseSubscription = _responseStream.listen(

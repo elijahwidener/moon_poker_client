@@ -66,6 +66,7 @@ class NetworkTestScreen extends StatefulWidget {
 class _NetworkTestScreenState extends State<NetworkTestScreen> {
   final _logger = Logger('NetworkTestScreen');
   final _networkController = NetworkController();
+  final _idController = TextEditingController();
   String _connectionStatus = 'Disconnected';
   String _lastUpdate = 'No updates';
   DisplayState _currentState = DisplayState.empty();
@@ -106,8 +107,9 @@ class _NetworkTestScreenState extends State<NetworkTestScreen> {
 
   Future<void> _connect() async {
     try {
+      final clientId = int.parse(_idController.text);
       setState(() => _connectionStatus = 'Connecting...');
-      await _networkController.connect();
+      await _networkController.connect(clientId: clientId);
       setState(() => _connectionStatus = 'Connected');
       _logger.info('Connected to server');
     } catch (e) {
@@ -181,6 +183,15 @@ class _NetworkTestScreenState extends State<NetworkTestScreen> {
           // wireframe for each widget.
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            TextField(
+              controller: _idController,
+              decoration: InputDecoration(
+                labelText: 'Enter User ID (simulating account)',
+                border: OutlineInputBorder(),
+              ),
+              keyboardType: TextInputType.number,
+            ),
+            SizedBox(height: 20),
             Text('Status: $_connectionStatus',
                 style: Theme.of(context).textTheme.titleMedium),
             const SizedBox(height: 8),
@@ -223,6 +234,7 @@ class _NetworkTestScreenState extends State<NetworkTestScreen> {
 
   @override
   void dispose() {
+    _idController.dispose();
     _networkController.dispose();
     super.dispose();
   }
