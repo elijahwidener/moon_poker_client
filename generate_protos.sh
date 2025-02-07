@@ -1,4 +1,5 @@
 #!/bin/bash
+# RUN IN GIT BASH
 
 echo "Starting proto generation..."
 
