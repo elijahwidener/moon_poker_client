@@ -4,8 +4,12 @@ package moon_poker;
 
 service GameService {
   rpc Authenticate(ConnectRequest) returns (ConnectResponse);
-  // Stream for sending game commands and receiving game state updates
-  rpc Connect(stream GameCommand) returns (stream GameUpdate);
+
+  // Clients send commands to the server (unary call)
+  rpc SendCommand(GameCommand) returns (CommandResponse);
+
+  // Clients listen for game state updates (server-streaming RPC)
+  rpc Connect(ConnectRequest) returns (stream GameUpdate);
 }
 
 message ConnectRequest {
@@ -39,7 +43,7 @@ message JoinData { int64 stack = 1; }
 message RaiseData { int64 amount = 1; }
 
 enum CommandType {
-  INVALID = 0;
+  PING = 0;
   JOIN = 1;
   LEAVE = 2;
   CHECK = 3;
@@ -48,6 +52,12 @@ enum CommandType {
   FOLD = 6;
   ADD_ON = 8;
   PAUSE_UNPAUSE = 9;
+  INVALID = 10;
+}
+
+message CommandResponse {
+  bool success = 1;
+  string message = 2;
 }
 
 message GameUpdate {

@@ -4,76 +4,83 @@ library;
 
 import 'dart:async';
 import 'package:fixnum/src/int64.dart';
+import 'package:http/http.dart' as http;
+import 'package:grpc/grpc_web.dart';
 import 'package:grpc/grpc.dart';
 import '../generated/game_service.pbgrpc.dart';
 import '../models/display_state.dart';
+import 'package:rxdart/rxdart.dart';
 
 /// Manages network communications with game server
 class NetworkController {
-  late final ClientChannel _channel;
+  late final GrpcWebClientChannel _channel;
   late final GameServiceClient _stub;
-  late final StreamController<DisplayState> _stateController;
-  late final StreamController<String> _errorController;
-
-  late final StreamController<GameCommand> _commandController;
-  late final ResponseStream<GameUpdate> _responseStream;
   StreamSubscription? _responseSubscription;
+  final _stateController = BehaviorSubject<DisplayState>();
+  final _errorController = BehaviorSubject<String>();
   bool _isConnected = false;
+  int _clientId = 0;
 
   /// Public stream for UI to listen to
   Stream<DisplayState> get stateStream => _stateController.stream;
   Stream<String> get errorStream => _errorController.stream;
   bool get isConnected => _isConnected;
 
-  NetworkController() {
-    _stateController = StreamController<DisplayState>.broadcast();
-    _errorController = StreamController<String>.broadcast();
-  }
-
   /// Establish connection to server
   Future<void> connect({
     required int clientId,
     String host = 'localhost',
-    int port = 50051,
+    int port = 8080,
   }) async {
     if (_isConnected) {
       await disconnect();
     }
 
     try {
-      // Create channel and stub
-      _channel = ClientChannel(
-        host,
+      _clientId = clientId;
+
+      _channel = GrpcWebClientChannel.xhr(Uri(
+        scheme: 'http',
+        host: host,
         port: port,
-        options: const ChannelOptions(
-          credentials: ChannelCredentials.insecure(),
-        ),
-      );
+      ));
+
       _stub = GameServiceClient(_channel);
 
-      final metadata = {
-        'client_id': clientId.toString(),
-      };
-      final options = CallOptions(metadata: metadata);
+      // First authenticate
+      final authRequest = ConnectRequest()..playerId = clientId;
+      final authResponse = await _stub.authenticate(authRequest);
 
-      // Start bidirectional stream
-      _commandController = StreamController<GameCommand>();
-      _responseStream =
-          _stub.connect(_commandController.stream, options: options);
+      if (!authResponse.success) {
+        throw Exception('Authentication failed');
+      }
 
-      // Listen for server updates
-      _responseSubscription = _responseStream.listen(
+      final request = ConnectRequest()..playerId = clientId;
+      final responseStream = _stub.connect(
+        request,
+        options: CallOptions(
+          metadata: {'client_id': clientId.toString()},
+        ),
+      );
+
+      // Set up response handling
+      _responseSubscription = responseStream.listen(
         _handleServerUpdate,
-        onError: _handleError,
+        onError: (error) {
+          print('Stream error: $error');
+          _handleError(error);
+          //_attemptReconnect();
+        },
         onDone: () {
-          _isConnected = false;
-          _handleError('Server connection closed');
+          print('Stream closed by server');
+          //_attemptReconnect();
         },
       );
 
       _isConnected = true;
+      print('Successfully established bidirectional stream');
     } catch (e) {
-      _handleError('Failed to connect to server: $e');
+      _handleError('Failed to connect: $e');
       rethrow;
     }
   }
@@ -82,7 +89,6 @@ class NetworkController {
   Future<void> disconnect() async {
     _isConnected = false;
     await _responseSubscription?.cancel();
-    await _commandController.close();
     await _channel.shutdown();
   }
 
@@ -93,7 +99,10 @@ class NetworkController {
     }
 
     try {
-      _commandController.add(command);
+      final response = await _stub.sendCommand(command);
+      if (!response.success) {
+        throw Exception("Server rejected command");
+      }
     } catch (e) {
       _handleError('Failed to send command: $e');
       rethrow;
@@ -151,7 +160,6 @@ class NetworkController {
     _responseSubscription?.cancel();
     _stateController.close();
     _errorController.close();
-    _commandController.close();
     _channel.shutdown();
   }
 }
