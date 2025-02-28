@@ -68,7 +68,7 @@ class UIState {
 }
 
 // Network Controller Provider
-@riverpod
+@Riverpod(keepAlive: true)
 NetworkController networkController(Ref ref) {
   // Create and initialize network controller
   final controller = NetworkController();
@@ -86,14 +86,25 @@ NetworkController networkController(Ref ref) {
 class GameState extends _$GameState {
   @override
   DisplayState build() {
-    // Listen to network controller's state stream
+    // Listen to network controller's state stream (from polling)
     ref.listen(
         networkControllerProvider
             .select((controller) => controller.stateStream), (previous, next) {
       next.listen(
-        (state) => state = state,
+        (newState) {
+          state = newState;
+          // Reset loading indicator when state changes
+          ref.read(uIStateNotifierProvider.notifier).setLoading(false);
+
+          // Debug log for state updates
+          print('Game state updated: active=${newState.isGameActive}, '
+              'pot=${newState.potSize}, '
+              'bet=${newState.currentBet}');
+        },
         onError: (error) {
           ref.read(uIStateNotifierProvider.notifier).setError(error.toString());
+          ref.read(uIStateNotifierProvider.notifier).setLoading(false);
+          print('Game state update error: $error');
         },
       );
     });
@@ -104,6 +115,8 @@ class GameState extends _$GameState {
   // Methods to update game state
   void updateState(DisplayState newState) {
     state = newState;
+    // Reset loading indicator when state changes
+    ref.read(uIStateNotifierProvider.notifier).setLoading(false);
   }
 }
 

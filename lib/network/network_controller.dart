@@ -21,6 +21,12 @@ class NetworkController {
   bool _isConnected = false;
   int _clientId = 0;
 
+  // Polling related members
+  Timer? _pollingTimer;
+  int _lastSequenceNumber = 0;
+  bool _isPolling = false;
+  static const Duration _pollingInterval = Duration(milliseconds: 500);
+
   /// Public stream for UI to listen to
   Stream<DisplayState> get stateStream => _stateController.stream;
   Stream<String> get errorStream => _errorController.stream;
@@ -55,30 +61,11 @@ class NetworkController {
         throw Exception('Authentication failed');
       }
 
-      final request = ConnectRequest()..playerId = clientId;
-      final responseStream = _stub.connect(
-        request,
-        options: CallOptions(
-          metadata: {'client_id': clientId.toString()},
-        ),
-      );
-
-      // Set up response handling
-      _responseSubscription = responseStream.listen(
-        _handleServerUpdate,
-        onError: (error) {
-          print('Stream error: $error');
-          _handleError(error);
-          //_attemptReconnect();
-        },
-        onDone: () {
-          print('Stream closed by server');
-          //_attemptReconnect();
-        },
-      );
-
       _isConnected = true;
-      print('Successfully established bidirectional stream');
+      print('Successfully authenticated with server');
+
+      // Start polling for game state updates
+      _startPolling();
     } catch (e) {
       _handleError('Failed to connect: $e');
       rethrow;
@@ -88,7 +75,7 @@ class NetworkController {
   /// disconnects from server
   Future<void> disconnect() async {
     _isConnected = false;
-    await _responseSubscription?.cancel();
+    _stopPolling();
     await _channel.shutdown();
   }
 
@@ -131,10 +118,55 @@ class NetworkController {
           command.join = JoinData()..stack = joinStack as Int64;
         }
         break;
+      case CommandType.PAUSE_UNPAUSE:
+        // No additional data needed for this command
+        break;
       default:
         break;
     }
     return command;
+  }
+
+  /// Start polling for game state updates
+  void _startPolling() {
+    if (_isPolling) return;
+
+    _isPolling = true;
+    _pollingTimer = Timer.periodic(_pollingInterval, (_) => _pollGameState());
+    print('Started polling for game state updates');
+  }
+
+  /// Stop polling for game state
+  void _stopPolling() {
+    _isPolling = false;
+    _pollingTimer?.cancel();
+    _pollingTimer = null;
+    print('Stopped polling for game state updates');
+  }
+
+  /// Poll the server for game state
+  Future<void> _pollGameState() async {
+    if (!_isConnected || !_isPolling) return;
+
+    try {
+      // Create state request with last known sequence number
+      final request = StateRequest()
+        ..playerId = _clientId
+        ..lastSequenceNumber = _lastSequenceNumber;
+
+      // Get game state
+      final update = await _stub.getGameState(request);
+
+      // Only process update if sequence number changed
+      if (update.sequenceNumber > _lastSequenceNumber) {
+        print('Received new game state: sequence ${update.sequenceNumber}');
+        _lastSequenceNumber = update.sequenceNumber;
+        _handleServerUpdate(update);
+      }
+    } catch (e) {
+      _handleError('Polling error: $e');
+      // Don't stop polling on errors, just log them
+    }
   }
 
   /// Handled incoming state updates from the server
@@ -157,7 +189,7 @@ class NetworkController {
 
   /// Cleanup resources
   void dispose() {
-    _responseSubscription?.cancel();
+    _stopPolling();
     _stateController.close();
     _errorController.close();
     _channel.shutdown();

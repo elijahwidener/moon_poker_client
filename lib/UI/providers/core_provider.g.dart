@@ -6,12 +6,11 @@ part of 'core_provider.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$networkControllerHash() => r'a96eec6dde67da1aa07b679cd493f8d746ee5541';
+String _$networkControllerHash() => r'2cc12ef3000eb1ffa6b3014819340bbe65d45093';
 
 /// See also [networkController].
 @ProviderFor(networkController)
-final networkControllerProvider =
-    AutoDisposeProvider<NetworkController>.internal(
+final networkControllerProvider = Provider<NetworkController>.internal(
   networkController,
   name: r'networkControllerProvider',
   debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
@@ -23,8 +22,8 @@ final networkControllerProvider =
 
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
-typedef NetworkControllerRef = AutoDisposeProviderRef<NetworkController>;
-String _$gameStateHash() => r'b2910cac7b751f936f9b48dff5d513996a77ea87';
+typedef NetworkControllerRef = ProviderRef<NetworkController>;
+String _$gameStateHash() => r'21f8bb2e884cb18b1e7f2c3522ee7247c20b5da4';
 
 /// See also [GameState].
 @ProviderFor(GameState)

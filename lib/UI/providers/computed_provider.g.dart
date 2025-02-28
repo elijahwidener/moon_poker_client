@@ -174,7 +174,7 @@ final activePlayerProvider = AutoDisposeProvider<PlayerDisplay?>.internal(
 // ignore: unused_element
 typedef ActivePlayerRef = AutoDisposeProviderRef<PlayerDisplay?>;
 String _$canShowBettingControlsHash() =>
-    r'03dc500abb5b1bdc999dd10fda4fa0589c8e832e';
+    r'7df5b79539cdb94569c5accc3016a4410e5f1be2';
 
 /// See also [canShowBettingControls].
 @ProviderFor(canShowBettingControls)

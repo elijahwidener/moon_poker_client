@@ -8,14 +8,10 @@ service GameService {
   // Clients send commands to the server (unary call)
   rpc SendCommand(GameCommand) returns (CommandResponse);
 
-  // Clients listen for game state updates (server-streaming RPC)
-  rpc Connect(ConnectRequest) returns (stream GameUpdate);
+  // Clients poll for game state updates (unary call)
+  rpc GetGameState(StateRequest) returns (GameUpdate);
 }
 
-message ConnectRequest {
-  int32 player_id = 1;
-  string auth_token = 2; // For future authentication
-}
 // TODO Look into using this or something else for authentication
 // Can pass along an auth token with commands to verify the player?
 
@@ -26,6 +22,12 @@ message ConnectResponse {
                             // string session_token = 3;
                             // uint64 server_time = 4;
                             // etc.
+}
+
+message StateRequest {
+  int32 player_id = 1;
+  int32 last_sequence_number =
+      2; // For optimization - only send updates if newer
 }
 
 message GameCommand {
