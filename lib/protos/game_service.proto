@@ -11,6 +11,10 @@ service GameService {
   // Clients poll for game state updates (unary call)
   rpc GetGameState(StateRequest) returns (GameUpdate);
 }
+message ConnectRequest {
+  int32 player_id = 1;
+  // Add any other fields needed for connection requests
+}
 
 // TODO Look into using this or something else for authentication
 // Can pass along an auth token with commands to verify the player?
