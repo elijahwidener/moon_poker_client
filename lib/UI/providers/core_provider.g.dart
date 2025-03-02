@@ -23,7 +23,7 @@ final networkControllerProvider = Provider<NetworkController>.internal(
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef NetworkControllerRef = ProviderRef<NetworkController>;
-String _$gameStateHash() => r'21f8bb2e884cb18b1e7f2c3522ee7247c20b5da4';
+String _$gameStateHash() => r'912d62d577771d3c6e33e6efe6e6d5e7cccd50c1';
 
 /// See also [GameState].
 @ProviderFor(GameState)
@@ -39,7 +39,7 @@ final gameStateProvider =
 
 typedef _$GameState = AutoDisposeNotifier<DisplayState>;
 String _$connectionStateNotifierHash() =>
-    r'ced9a919c72b68ea8f0b9faad6fabd3219789143';
+    r'e6cc0355dc4a1c428a93b369771e059c929ab621';
 
 /// See also [ConnectionStateNotifier].
 @ProviderFor(ConnectionStateNotifier)

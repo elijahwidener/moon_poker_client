@@ -1,9 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../models/display_state.dart';
-import '../../models/player_display.dart';
 import '../../network/network_controller.dart';
-
+import 'dart:async';
 part 'core_provider.g.dart';
 
 // Connection States
@@ -86,28 +85,33 @@ NetworkController networkController(Ref ref) {
 class GameState extends _$GameState {
   @override
   DisplayState build() {
-    // Listen to network controller's state stream (from polling)
-    ref.listen(
-        networkControllerProvider
-            .select((controller) => controller.stateStream), (previous, next) {
-      next.listen(
-        (newState) {
-          state = newState;
-          // Reset loading indicator when state changes
-          ref.read(uIStateNotifierProvider.notifier).setLoading(false);
+    final controller = ref.watch(networkControllerProvider);
 
-          // Debug log for state updates
-          print('Game state updated: active=${newState.isGameActive}, '
-              'pot=${newState.potSize}, '
-              'bet=${newState.currentBet}');
-        },
-        onError: (error) {
-          ref.read(uIStateNotifierProvider.notifier).setError(error.toString());
-          ref.read(uIStateNotifierProvider.notifier).setLoading(false);
-          print('Game state update error: $error');
-        },
-      );
-    });
+    // Listen to network controller's state stream (from polling)
+    controller.stateStream.listen(
+      (newState) {
+        state = newState;
+        // Reset loading indicator when state changes
+        ref.read(uIStateNotifierProvider.notifier).setLoading(false);
+
+        // Debug log for state updates
+        print('Game state updated: active=${newState.isGameActive}, '
+            'pot=${newState.potSize}, '
+            'bet=${newState.currentBet}');
+      },
+      onError: (error) {
+        ref.read(uIStateNotifierProvider.notifier).setError(error.toString());
+        ref.read(uIStateNotifierProvider.notifier).setLoading(false);
+        print('Game state update error: $error');
+      },
+    );
+
+    // Listen to error stream
+    controller.errorStream.listen(
+      (errorMsg) {
+        ref.read(uIStateNotifierProvider.notifier).setError(errorMsg);
+      },
+    );
 
     return DisplayState.empty();
   }
@@ -123,8 +127,33 @@ class GameState extends _$GameState {
 // Connection State Notifier
 @riverpod
 class ConnectionStateNotifier extends _$ConnectionStateNotifier {
+  StreamSubscription? _errorSubscription;
+
   @override
   ConnectionState build() {
+    // Listen to network controller error stream for connection issues
+    final controller = ref.watch(networkControllerProvider);
+    _errorSubscription = controller.errorStream.listen((errorMsg) {
+      if (errorMsg.contains('Connection lost') ||
+          errorMsg.contains('Reconnecting')) {
+        state = ConnectionState(
+          status: ConnectionStatus.connecting,
+          error: errorMsg,
+          clientId: state.clientId,
+        );
+      } else if (errorMsg.contains('Reconnected')) {
+        state = ConnectionState(
+          status: ConnectionStatus.connected,
+          clientId: state.clientId,
+        );
+      }
+    });
+
+    // Dispose subscription when provider is disposed
+    ref.onDispose(() {
+      _errorSubscription?.cancel();
+    });
+
     // Initialize with disconnected state
     return ConnectionState(
       status: ConnectionStatus.disconnected,

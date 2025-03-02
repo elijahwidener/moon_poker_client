@@ -70,14 +70,27 @@ class PokerTable extends StatelessWidget {
 
             // Player positions
             ...List.generate(9, (index) {
-              final player = gameState.players[index];
+              PlayerDisplay? player;
+              for (var p in gameState.players) {
+                if (p.seatPosition == index) {
+                  player = p;
+                  break;
+                }
+              }
               final position =
                   _getPlayerPosition(index, centerX, centerY, radius);
 
               return Positioned(
                 left: position.dx - 60, // Half of seat width
                 top: position.dy - 40, // Half of seat height
-                child: _buildPlayerSeat(player),
+                child: _buildPlayerSeat(player ??
+                    PlayerDisplay(
+                      playerId: 0,
+                      stack: 0,
+                      currentBet: 0,
+                      isFolded: false,
+                      seatPosition: index,
+                    )),
               );
             }),
 
