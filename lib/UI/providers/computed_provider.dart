@@ -1,6 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import '../../models/display_state.dart';
 import '../../models/player_display.dart';
 import 'core_provider.dart';
 
@@ -12,9 +11,13 @@ bool isActivePlayer(Ref ref, int playerId) {
   final gameState = ref.watch(gameStateProvider);
   final activePosition = gameState.activePlayerPosition;
 
-  return gameState.players
+  final result = gameState.players
       .where((p) => p.playerId == playerId)
       .any((p) => p.seatPosition == activePosition);
+
+  print('isActivePlayer($playerId): $result, activePosition: $activePosition');
+
+  return result;
 }
 
 @riverpod
@@ -33,8 +36,10 @@ bool canShowBettingControls(Ref ref, int playerId) {
   final isActive = ref.watch(isActivePlayerProvider(playerId));
   final gameState = ref.watch(gameStateProvider);
   final uiState = ref.watch(uIStateNotifierProvider);
+  print(
+      'Controls check - Player: $playerId, isActive: $isActive, gameActive: ${gameState.isGameActive}, isLoading: ${uiState.isLoading}');
 
-  return isActive && gameState.isGameActive && uiState.isLoading;
+  return isActive && gameState.isGameActive && !uiState.isLoading;
 }
 
 @riverpod

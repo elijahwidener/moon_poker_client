@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../models/display_state.dart';
 import '../../models/player_display.dart';
 import 'dealer_button.dart';
+import '../../models/card_display.dart';
 import 'dart:math' as math;
 
 class PokerTable extends StatelessWidget {
@@ -130,9 +131,14 @@ class PokerTable extends StatelessWidget {
     final isLocal = player.playerId == localPlayerId;
     final isActive = gameState.activePlayerPosition == player.seatPosition;
 
+    // Debug print
+    if (isOccupied) {
+      print('Player ${player.playerId} cards: ${player.holeCards}');
+    }
+
     return Container(
       width: 120,
-      height: 80,
+      height: 120, // Make taller to fit cards
       decoration: BoxDecoration(
         color: isOccupied
             ? (isActive ? Colors.blue.withOpacity(0.3) : Colors.black54)
@@ -151,6 +157,16 @@ class PokerTable extends StatelessWidget {
                     fontSize: 14,
                   ),
                 ),
+                const SizedBox(height: 4),
+
+                // Show cards if the player has any and they're the local player
+                if (player.holeCards.isNotEmpty)
+                  CardDisplay(
+                    cards: player.holeCards,
+                    showFaceUp:
+                        isLocal, // Only show face up for the local player
+                  ),
+
                 const SizedBox(height: 4),
                 Text(
                   '\$${player.stack}',

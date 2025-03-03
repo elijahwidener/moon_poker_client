@@ -78,6 +78,7 @@ message PlayerView {
   int64 current_bet = 3;
   bool is_folded = 4;
   uint32 seat_position = 5;
+  repeated uint32 hole_cards = 6;
 }
 
 message GameSnapshot {

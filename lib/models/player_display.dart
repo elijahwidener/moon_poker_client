@@ -15,6 +15,7 @@
 library;
 
 import '../generated/game_service.pb.dart';
+import 'package:collection/collection.dart';
 
 class PlayerDisplay {
   final int playerId; // Unique identifier for the player
@@ -22,6 +23,7 @@ class PlayerDisplay {
   final int currentBet; // Current bet in this round
   final bool isFolded; // Whether the player has folded
   final int seatPosition; // Position at the table (0-8)
+  final List<int> holeCards; // Player's hole cards
 
   const PlayerDisplay({
     required this.playerId,
@@ -29,16 +31,20 @@ class PlayerDisplay {
     required this.currentBet,
     required this.isFolded,
     required this.seatPosition,
+    this.holeCards = const [],
   });
 
   // Create from proto message
   factory PlayerDisplay.fromProto(PlayerView proto) {
+    print('Cards received: ${proto.holeCards.toList()}');
+
     return PlayerDisplay(
       playerId: proto.playerId.toInt(),
       stack: proto.stack.toInt(),
       currentBet: proto.currentBet.toInt(),
       isFolded: proto.isFolded,
       seatPosition: proto.seatPosition,
+      holeCards: proto.holeCards.toList(),
     );
   }
 
@@ -49,6 +55,7 @@ class PlayerDisplay {
     int? currentBet,
     bool? isFolded,
     int? seatPosition,
+    List<int>? holeCards,
   }) {
     return PlayerDisplay(
       playerId: playerId ?? this.playerId,
@@ -56,6 +63,7 @@ class PlayerDisplay {
       currentBet: currentBet ?? this.currentBet,
       isFolded: isFolded ?? this.isFolded,
       seatPosition: seatPosition ?? this.seatPosition,
+      holeCards: holeCards ?? this.holeCards,
     );
   }
 
@@ -67,7 +75,8 @@ class PlayerDisplay {
           other.stack == stack &&
           other.currentBet == currentBet &&
           other.isFolded == isFolded &&
-          other.seatPosition == seatPosition;
+          other.seatPosition == seatPosition &&
+          ListEquality().equals(other.holeCards, holeCards);
 
   @override
   int get hashCode => Object.hash(
@@ -76,5 +85,6 @@ class PlayerDisplay {
         currentBet,
         isFolded,
         seatPosition,
+        ListEquality().hash(holeCards),
       );
 }

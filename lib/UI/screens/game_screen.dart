@@ -46,28 +46,16 @@ class GameScreen extends ConsumerWidget {
     // Check if we're seated at the table
     final isSeated = gameState.players.any((p) => p.playerId == clientId);
     final isActive = ref.watch(isActivePlayerProvider(clientId));
+    final canShowControls =
+        isActive && gameState.isGameActive && !uiState.isLoading;
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('Moon Poker'),
         actions: [
-          // Game controls for seated players
-          if (isSeated) ...[
-            GameControls(clientId: clientId),
-            const SizedBox(width: 8),
-            TextButton.icon(
-              icon: Icon(
-                gameState.isGameActive ? Icons.pause : Icons.play_arrow,
-                color: Colors.white,
-              ),
-              label: Text(
-                gameState.isGameActive ? 'Pause Game' : 'Start Game',
-                style: const TextStyle(color: Colors.white),
-              ),
-              onPressed: () => _handleGameControl(ref, gameState.isGameActive),
-            ),
-            const SizedBox(width: 8),
-          ],
+          // Game controls for admin
+          if (clientId == 1) GameControls(clientId: clientId),
+          const SizedBox(width: 8),
           TextButton.icon(
             icon: const Icon(Icons.logout, color: Colors.white),
             label:
@@ -84,6 +72,38 @@ class GameScreen extends ConsumerWidget {
           PokerTable(
             gameState: gameState,
             localPlayerId: clientId,
+          ),
+
+          // Debug panel (temporary - remove for production)
+          Positioned(
+            top: 50,
+            left: 10,
+            child: Container(
+              padding: const EdgeInsets.all(8),
+              color: Colors.black54,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('Debug Info:',
+                      style: TextStyle(
+                          color: Colors.red, fontWeight: FontWeight.bold)),
+                  Text('clientId: $clientId',
+                      style: TextStyle(color: Colors.white)),
+                  Text('isSeated: $isSeated',
+                      style: TextStyle(color: Colors.white)),
+                  Text('isActive: $isActive',
+                      style: TextStyle(color: Colors.white)),
+                  Text('gameActive: ${gameState.isGameActive}',
+                      style: TextStyle(color: Colors.white)),
+                  Text('isLoading: ${uiState.isLoading}',
+                      style: TextStyle(color: Colors.white)),
+                  Text('showControls: $canShowControls',
+                      style: TextStyle(color: Colors.white)),
+                  Text('activePos: ${gameState.activePlayerPosition}',
+                      style: TextStyle(color: Colors.white)),
+                ],
+              ),
+            ),
           ),
 
           // Status bar at top
@@ -107,7 +127,7 @@ class GameScreen extends ConsumerWidget {
                   ),
                   if (isActive)
                     const Text(
-                      'Your Turn!',
+                      'YOUR TURN!',
                       style: TextStyle(
                         color: Colors.yellow,
                         fontWeight: FontWeight.bold,
@@ -118,8 +138,8 @@ class GameScreen extends ConsumerWidget {
             ),
           ),
 
-          // Betting controls for active players
-          if (ref.watch(canShowBettingControlsProvider(clientId)))
+          // Betting controls - use direct condition to bypass provider issues
+          if (canShowControls)
             Positioned(
               left: 0,
               right: 0,
@@ -128,10 +148,13 @@ class GameScreen extends ConsumerWidget {
                 gameState: gameState,
                 networkController: ref.watch(networkControllerProvider),
                 localPlayerId: clientId,
-                playerStack: gameState.players
-                    .firstWhere((p) => p.playerId == clientId)
-                    .stack,
-                isActive: isActive,
+                playerStack: isSeated
+                    ? gameState.players
+                        .firstWhere((p) => p.playerId == clientId)
+                        .stack
+                    : 0,
+                isActive:
+                    true, // Always true here since we checked canShowControls
               ),
             ),
 

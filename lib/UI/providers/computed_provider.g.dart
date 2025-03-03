@@ -6,7 +6,7 @@ part of 'computed_provider.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$isActivePlayerHash() => r'f420fb2e12ea18f50c8c6b68a937dc1e3a8a5e92';
+String _$isActivePlayerHash() => r'a71684599de77398939c70c79aa11bffc66c08a3';
 
 /// Copied from Dart SDK
 class _SystemHash {
@@ -174,7 +174,7 @@ final activePlayerProvider = AutoDisposeProvider<PlayerDisplay?>.internal(
 // ignore: unused_element
 typedef ActivePlayerRef = AutoDisposeProviderRef<PlayerDisplay?>;
 String _$canShowBettingControlsHash() =>
-    r'7df5b79539cdb94569c5accc3016a4410e5f1be2';
+    r'3258c794c4c143df6b832621aba9f92db94984c2';
 
 /// See also [canShowBettingControls].
 @ProviderFor(canShowBettingControls)

@@ -159,8 +159,8 @@ class NetworkController {
     if (_isPolling) return;
 
     _isPolling = true;
-    _pollingTimer = Timer.periodic(_pollingInterval, (_) => _pollGameState());
-    _log.info('Started polling for game state updates');
+    _pollGameState();
+    print('Started long polling for game state updates');
   }
 
   /// Stop polling for game state
@@ -168,7 +168,7 @@ class NetworkController {
     _isPolling = false;
     _pollingTimer?.cancel();
     _pollingTimer = null;
-    _log.info('Stopped polling for game state updates');
+    print('Stopped polling for game state updates');
   }
 
   /// Poll the server for game state
@@ -182,59 +182,28 @@ class NetworkController {
         ..lastSequenceNumber = _lastSequenceNumber;
 
       // Get game state
-      final update = await _stub.getGameState(request);
+      final update = await _stub.getGameState(request).timeout(
+            Duration(seconds: 25), // Slightly longer than server timeout
+          );
 
-      // Reset consecutive errors counter on success
-      _consecutiveErrors = 0;
-
-      // Only process update if sequence number changed
+      // Process update if there's a change
       if (update.sequenceNumber > _lastSequenceNumber) {
-        _log.info('Received new game state: sequence ${update.sequenceNumber}');
         _lastSequenceNumber = update.sequenceNumber;
         _handleServerUpdate(update);
       }
+
+      // Immediately start the next polling cycle
+      if (_isPolling) {
+        _pollGameState();
+      }
     } catch (e) {
-      _consecutiveErrors++;
-      _log.warning(
-          'Polling error: $e (consecutive errors: $_consecutiveErrors)');
+      _handleError('Polling error: $e');
 
-      if (_consecutiveErrors >= _maxConsecutiveErrors) {
-        _handleReconnection();
+      // On error, wait a short time before retrying to avoid rapid failure cycles
+      if (_isPolling) {
+        Timer(Duration(seconds: 2), () => _pollGameState());
       }
     }
-  }
-
-  /// Handle reconnection after multiple consecutive errors
-  void _handleReconnection() {
-    if (_reconnectionAttempts >= _maxReconnectionAttempts) {
-      _log.warning('Max reconnection attempts reached. Giving up.');
-      _errorController.add(
-          'Unable to reconnect after $_maxReconnectionAttempts attempts. Please try again later.');
-      _reconnectionAttempts = 0; // Reset for next time
-      return;
-    }
-
-    _reconnectionAttempts++;
-    _log.info(
-        'Attempting to reconnect... (Attempt $_reconnectionAttempts of $_maxReconnectionAttempts)');
-    _stopPolling();
-
-    // Notify UI about reconnection attempt
-    _errorController.add(
-        'Connection lost. Attempting to reconnect... (${_reconnectionAttempts}/${_maxReconnectionAttempts})');
-
-    // Attempt reconnection after delay
-    Future.delayed(_reconnectInterval, () async {
-      try {
-        await connect(clientId: _clientId);
-        _errorController.add('Reconnected successfully');
-        _reconnectionAttempts = 0; // Reset on success
-      } catch (e) {
-        _errorController.add('Reconnection failed: $e');
-        // Try again (with the limit check at the beginning)
-        _handleReconnection();
-      }
-    });
   }
 
   /// Handle incoming state updates from the server
