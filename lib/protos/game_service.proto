@@ -57,7 +57,6 @@ enum CommandType {
   RAISE = 5;
   FOLD = 6;
   ADD_ON = 8;
-  PAUSE_UNPAUSE = 9;
   INVALID = 10;
 }
 

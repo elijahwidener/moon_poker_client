@@ -201,19 +201,3 @@ class GameScreen extends ConsumerWidget {
     }
   }
 
-  void _handleGameControl(WidgetRef ref, bool isRunning) async {
-    try {
-      final command = ref.read(networkControllerProvider).createCommand(
-            type:
-                //TODO add a start game command
-                isRunning
-                    ? CommandType.PAUSE_UNPAUSE
-                    : CommandType.PAUSE_UNPAUSE,
-            playerId: clientId,
-          );
-      await ref.read(networkControllerProvider).sendCommand(command);
-    } catch (e) {
-      ref.read(uIStateNotifierProvider.notifier).setError(e.toString());
-    }
-  }
-}

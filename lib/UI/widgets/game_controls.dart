@@ -4,7 +4,7 @@ import '../providers/core_provider.dart';
 import '../../generated/game_service.pb.dart';
 import '../../network/network_controller.dart';
 
-/// Widget that provides game control buttons (start/pause/unpause)
+/// Widget that provides game control buttons
 class GameControls extends ConsumerWidget {
   final int clientId;
 
@@ -40,8 +40,6 @@ class GameControls extends ConsumerWidget {
               onPressed: uiState.isLoading
                   ? null
                   : () {
-                      _sendGameCommand(networkController,
-                          CommandType.PAUSE_UNPAUSE, clientId);
                       ref
                           .read(uIStateNotifierProvider.notifier)
                           .setLoading(true);
@@ -50,7 +48,7 @@ class GameControls extends ConsumerWidget {
                 backgroundColor: Colors.black45,
               ),
             ),
-
+          // TODO: Remove
           if (gameState.isGameActive)
             ElevatedButton.icon(
               icon: const Icon(Icons.pause, color: Colors.orange),
@@ -58,8 +56,6 @@ class GameControls extends ConsumerWidget {
               onPressed: uiState.isLoading
                   ? null
                   : () {
-                      _sendGameCommand(networkController,
-                          CommandType.PAUSE_UNPAUSE, clientId);
                       ref
                           .read(uIStateNotifierProvider.notifier)
                           .setLoading(true);
