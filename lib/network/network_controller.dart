@@ -197,6 +197,15 @@ class NetworkController {
         _pollGameState();
       }
     } catch (e) {
+      // Check if this is a "no state change" response
+      if (e is GrpcError && e.code == StatusCode.alreadyExists) {
+        // This is not an error, just means no state change
+        // Start the next polling cycle right away
+        if (_isPolling) {
+          _pollGameState();
+        }
+        return;
+      }
       _handleError('Polling error: $e');
 
       // On error, wait a short time before retrying to avoid rapid failure cycles

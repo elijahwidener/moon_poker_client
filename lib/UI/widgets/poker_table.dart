@@ -21,7 +21,14 @@ class PokerTable extends StatelessWidget {
       builder: (context, constraints) {
         final centerX = constraints.maxWidth / 2;
         final centerY = constraints.maxHeight / 2;
-        final radius = math.min(centerX, centerY) * 0.8;
+        final radius = math.min(centerX, centerY) * 0.75;
+
+        // Simple scale factor based on screen size
+        final scale =
+            math.min(constraints.maxWidth, constraints.maxHeight) / 800;
+
+        // Push players farther from center
+        final edgePushFactor = 1.1;
 
         return Stack(
           children: [
@@ -47,11 +54,27 @@ class PokerTable extends StatelessWidget {
               ),
             ),
 
+            // Community cards display
+            Positioned(
+              top: math.max(centerY - 100, 20),
+              left: 0,
+              right: 0,
+              child: Center(
+                child: CardDisplay(
+                  cards: gameState.boardCards,
+                  showFaceUp: true,
+                  cardWidth: 60 * scale,
+                  cardHeight: 90 * scale,
+                ),
+              ),
+            ),
+
             // Pot display in center
-            if (gameState.potSize > 0)
-              Positioned(
-                top: centerY - 25,
-                left: centerX - 50,
+            Positioned(
+              top: centerY + 40,
+              left: 0,
+              right: 0,
+              child: Center(
                 child: Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
@@ -59,7 +82,7 @@ class PokerTable extends StatelessWidget {
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Text(
-                    'Pot: \$${gameState.potSize}',
+                    'Pot: ${gameState.potSize}',
                     style: const TextStyle(
                       color: Colors.white,
                       fontSize: 16,
@@ -68,6 +91,7 @@ class PokerTable extends StatelessWidget {
                   ),
                 ),
               ),
+            ),
 
             // Player positions
             ...List.generate(9, (index) {
@@ -78,27 +102,37 @@ class PokerTable extends StatelessWidget {
                   break;
                 }
               }
-              final position =
-                  _getPlayerPosition(index, centerX, centerY, radius);
+
+              // Get player position, pushed farther from center
+              final angle = (2 * math.pi * index / 9) - (math.pi / 2);
+              final xRadius = radius * 1.2 * edgePushFactor;
+              final yRadius = radius * 0.9 * edgePushFactor;
+
+              final position = Offset(
+                centerX + xRadius * math.cos(angle),
+                centerY + yRadius * math.sin(angle),
+              );
 
               return Positioned(
-                left: position.dx - 60, // Half of seat width
-                top: position.dy - 40, // Half of seat height
-                child: _buildPlayerSeat(player ??
-                    PlayerDisplay(
-                      playerId: 0,
-                      stack: 0,
-                      currentBet: 0,
-                      isFolded: false,
-                      seatPosition: index,
-                    )),
+                left: position.dx - 60,
+                top: position.dy - 40,
+                child: _buildPlayerSeat(
+                    player ??
+                        PlayerDisplay(
+                          playerId: 0,
+                          stack: 0,
+                          currentBet: 0,
+                          isFolded: false,
+                          seatPosition: index,
+                        ),
+                    scale),
               );
             }),
 
             // Current bet display
             if (gameState.currentBet > 0)
               Positioned(
-                top: centerY + 40,
+                top: centerY + 75,
                 left: centerX - 40,
                 child: Container(
                   padding: const EdgeInsets.all(8),
@@ -115,6 +149,7 @@ class PokerTable extends StatelessWidget {
                   ),
                 ),
               ),
+
             DealerButton(
               position: gameState.button,
               tableWidth: constraints.maxWidth,
@@ -126,19 +161,20 @@ class PokerTable extends StatelessWidget {
     );
   }
 
-  Widget _buildPlayerSeat(PlayerDisplay player) {
+  // TODO: Work on making this more dynamic and clean. Looks fine for now.
+
+  Widget _buildPlayerSeat(PlayerDisplay player, double scale) {
     final isOccupied = player.playerId != 0;
     final isLocal = player.playerId == localPlayerId;
     final isActive = gameState.activePlayerPosition == player.seatPosition;
 
-    // Debug print
-    if (isOccupied) {
-      print('Player ${player.playerId} cards: ${player.holeCards}');
-    }
+    // Scale the seat size but keep it simple
+    final width = 120.0 * scale;
+    final height = 150.0 * scale;
 
     return Container(
-      width: 120,
-      height: 120, // Make taller to fit cards
+      width: width,
+      height: height,
       decoration: BoxDecoration(
         color: isOccupied
             ? (isActive ? Colors.blue.withOpacity(0.3) : Colors.black54)
@@ -159,12 +195,15 @@ class PokerTable extends StatelessWidget {
                 ),
                 const SizedBox(height: 4),
 
-                // Show cards if the player has any and they're the local player
-                if (player.holeCards.isNotEmpty)
+                // Show cards if the player is still in the hand
+                if (!player.isFolded)
                   CardDisplay(
-                    cards: player.holeCards,
-                    showFaceUp:
-                        isLocal, // Only show face up for the local player
+                    cards: isLocal
+                        ? player.holeCards
+                        : [1, 1], // Dummy cards for non-local players
+                    showFaceUp: isLocal,
+                    cardWidth: 30 * scale,
+                    cardHeight: 45 * scale,
                   ),
 
                 const SizedBox(height: 4),
@@ -186,25 +225,11 @@ class PokerTable extends StatelessWidget {
                   ),
               ],
             )
-          : const Icon(
+          : Icon(
               Icons.chair,
               color: Colors.white24,
-              size: 32,
+              size: 32 * scale,
             ),
-    );
-  }
-
-  Offset _getPlayerPosition(
-      int seatIndex, double centerX, double centerY, double radius) {
-    // Arrange seats in an elliptical pattern
-    final angle = (2 * math.pi * seatIndex / 9) - (math.pi / 2);
-    // Make the table slightly oval by adjusting X radius
-    final xRadius = radius * 1.2;
-    final yRadius = radius * 0.9;
-
-    return Offset(
-      centerX + xRadius * math.cos(angle),
-      centerY + yRadius * math.sin(angle),
     );
   }
 }

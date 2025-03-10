@@ -3,11 +3,15 @@ import 'package:flutter/material.dart';
 class CardDisplay extends StatelessWidget {
   final List<int> cards;
   final bool showFaceUp;
+  final double cardWidth;
+  final double cardHeight;
 
   const CardDisplay({
     super.key,
     required this.cards,
     this.showFaceUp = false,
+    this.cardWidth = 40,
+    this.cardHeight = 60,
   });
 
   @override
@@ -15,10 +19,10 @@ class CardDisplay extends StatelessWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        for (int i = 0; i < 2; i++) // Show 2 cards for poker
+        for (int i = 0; i < cards.length; i++)
           Padding(
-            padding: EdgeInsets.only(right: i == 0 ? 2.0 : 0),
-            child: _buildCard(i < cards.length ? cards[i] : 0),
+            padding: EdgeInsets.only(right: i < cards.length - 1 ? 2.0 : 0),
+            child: _buildCard(cards[i]),
           ),
       ],
     );
@@ -28,8 +32,8 @@ class CardDisplay extends StatelessWidget {
     // Card face-down if not showing face up
     if (!showFaceUp || cardValue == 0) {
       return Container(
-        width: 30,
-        height: 40,
+        width: cardWidth,
+        height: cardHeight,
         decoration: BoxDecoration(
           color: Colors.blue.shade800,
           borderRadius: BorderRadius.circular(3),
@@ -44,8 +48,8 @@ class CardDisplay extends StatelessWidget {
 
     // Card face display
     return Container(
-      width: 30,
-      height: 40,
+      width: cardWidth,
+      height: cardHeight,
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(3),
@@ -59,14 +63,15 @@ class CardDisplay extends StatelessWidget {
             style: TextStyle(
               color: _suitColor(suit),
               fontWeight: FontWeight.bold,
-              fontSize: 12,
+              fontSize: cardWidth * 0.4,
             ),
           ),
+          SizedBox(height: cardHeight * 0.05),
           Text(
             _suitString(suit),
             style: TextStyle(
               color: _suitColor(suit),
-              fontSize: 12,
+              fontSize: cardWidth * 0.5,
             ),
           ),
         ],
