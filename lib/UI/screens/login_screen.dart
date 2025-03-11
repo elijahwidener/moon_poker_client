@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/core_provider.dart';
-import 'game_screen.dart';
+import 'lobby_screen.dart';
 
 class LoginScreen extends ConsumerWidget {
   LoginScreen({super.key});
@@ -25,13 +25,13 @@ class LoginScreen extends ConsumerWidget {
       });
     }
 
-    // If connected, navigate to game screen
+    // If connected, navigate to lobby screen
     if (connectionState.status == ConnectionStatus.connected) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(
             builder: (context) =>
-                GameScreen(clientId: connectionState.clientId),
+                LobbyScreen(clientId: connectionState.clientId),
           ),
         );
       });
