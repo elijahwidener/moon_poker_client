@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../../models/display_state.dart';
 import '../../models/player_display.dart';
 import 'dealer_button.dart';
-import '../../models/card_display.dart';
+import 'card_widgets.dart';
 import 'dart:math' as math;
 
 class PokerTable extends StatelessWidget {
@@ -60,11 +60,10 @@ class PokerTable extends StatelessWidget {
               left: 0,
               right: 0,
               child: Center(
-                child: CardDisplay(
+                child: CommunityCards(
                   cards: gameState.boardCards,
-                  showFaceUp: true,
-                  cardWidth: 60 * scale,
-                  cardHeight: 90 * scale,
+                  height: 90 * scale,
+                  // Width is auto-calculated based on card aspect ratio
                 ),
               ),
             ),
@@ -197,13 +196,12 @@ class PokerTable extends StatelessWidget {
 
                 // Show cards if the player is still in the hand
                 if (!player.isFolded)
-                  CardDisplay(
+                  HoleCards(
                     cards: isLocal
                         ? player.holeCards
                         : [1, 1], // Dummy cards for non-local players
-                    showFaceUp: isLocal,
-                    cardWidth: 30 * scale,
-                    cardHeight: 45 * scale,
+                    showCards: isLocal,
+                    height: 45 * scale,
                   ),
 
                 const SizedBox(height: 4),

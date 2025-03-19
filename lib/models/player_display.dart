@@ -36,8 +36,6 @@ class PlayerDisplay {
 
   // Create from proto message
   factory PlayerDisplay.fromProto(PlayerView proto) {
-    print('Cards received: ${proto.holeCards.toList()}');
-
     return PlayerDisplay(
       playerId: proto.playerId.toInt(),
       stack: proto.stack.toInt(),

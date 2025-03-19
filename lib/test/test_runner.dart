@@ -47,12 +47,14 @@ class TestHomeScreen extends StatelessWidget {
               onPressed: () {
                 Navigator.of(context).push(
                   MaterialPageRoute(
-                    builder: (context) => const GameStatePreview(localPlayerId: 1),
+                    builder: (context) =>
+                        const GameStatePreview(localPlayerId: 1),
                   ),
                 );
               },
               style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
               ),
               child: const Text('Preview Turn with 3 Players'),
             ),
@@ -62,12 +64,14 @@ class TestHomeScreen extends StatelessWidget {
                 // Can add more test scenarios here
                 Navigator.of(context).push(
                   MaterialPageRoute(
-                    builder: (context) => const GameStatePreview(localPlayerId: 2),
+                    builder: (context) =>
+                        const GameStatePreview(localPlayerId: 2),
                   ),
                 );
               },
               style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
               ),
               child: const Text('Preview as Player 2'),
             ),
