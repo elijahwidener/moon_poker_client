@@ -62,7 +62,7 @@ class PokerTable extends StatelessWidget {
               child: Center(
                 child: CommunityCards(
                   cards: gameState.boardCards,
-                  height: 90 * scale,
+                  height: 140 * scale,
                   // Width is auto-calculated based on card aspect ratio
                 ),
               ),
@@ -196,12 +196,15 @@ class PokerTable extends StatelessWidget {
 
                 // Show cards if the player is still in the hand
                 if (!player.isFolded)
-                  HoleCards(
-                    cards: isLocal
-                        ? player.holeCards
-                        : [1, 1], // Dummy cards for non-local players
-                    showCards: isLocal,
-                    height: 45 * scale,
+                  Flexible(
+                    // Add Flexible wrapper
+                    child: HoleCards(
+                      cards: isLocal
+                          ? player.holeCards
+                          : [1, 1], // Dummy cards for non-local players
+                      showCards: isLocal,
+                      height: 60 * scale,
+                    ),
                   ),
 
                 const SizedBox(height: 4),

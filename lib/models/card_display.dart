@@ -1,100 +1,18 @@
 import 'package:flutter/material.dart';
-import 'package:playing_cards/playing_cards.dart';
 
 class CardDisplay extends StatelessWidget {
   final List<int> cards;
   final bool showFaceUp;
   final double cardWidth;
   final double cardHeight;
-  final double spacing;
-  final bool enableShadows;
 
   const CardDisplay({
-    Key? key,
+    super.key,
     required this.cards,
     this.showFaceUp = false,
-    this.cardWidth = 85, // Increased width
-    this.cardHeight = 120, // Increased height
-    this.spacing = 8.0, // Increased spacing
-    this.enableShadows = true,
-  }) : super(key: key);
-
-  // Convert our 8-bit card value to PlayingCard format
-  PlayingCard _convertToPlayingCard(int value) {
-    if (value == 0)
-      return PlayingCard(Suit.hearts, CardValue.ace); // Invalid card
-
-    // Extract rank (high 4 bits) and suit (low 4 bits)
-    final rank = value >> 4;
-    final suit = value & 0x0F;
-
-    // Convert rank
-    CardValue cardValue;
-    switch (rank) {
-      case 0x02:
-        cardValue = CardValue.two;
-        break;
-      case 0x03:
-        cardValue = CardValue.three;
-        break;
-      case 0x04:
-        cardValue = CardValue.four;
-        break;
-      case 0x05:
-        cardValue = CardValue.five;
-        break;
-      case 0x06:
-        cardValue = CardValue.six;
-        break;
-      case 0x07:
-        cardValue = CardValue.seven;
-        break;
-      case 0x08:
-        cardValue = CardValue.eight;
-        break;
-      case 0x09:
-        cardValue = CardValue.nine;
-        break;
-      case 0x0A:
-        cardValue = CardValue.ten;
-        break;
-      case 0x0B:
-        cardValue = CardValue.jack;
-        break;
-      case 0x0C:
-        cardValue = CardValue.queen;
-        break;
-      case 0x0D:
-        cardValue = CardValue.king;
-        break;
-      case 0x0E:
-        cardValue = CardValue.ace;
-        break;
-      default:
-        cardValue = CardValue.ace; // Invalid rank
-    }
-
-    // Convert suit
-    Suit cardSuit;
-    switch (suit) {
-      case 0x04:
-        cardSuit = Suit.spades;
-        break;
-      case 0x03:
-        cardSuit = Suit.hearts;
-        break;
-      case 0x02:
-        cardSuit = Suit.clubs;
-        break;
-      case 0x01:
-        cardSuit = Suit.diamonds;
-        break;
-      default:
-        cardSuit = Suit.hearts; // Invalid suit
-    }
-
-    return PlayingCard(cardSuit, cardValue);
-  }
+    this.cardWidth = 40,
+    this.cardHeight = 60,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -103,38 +21,114 @@ class CardDisplay extends StatelessWidget {
       children: [
         for (int i = 0; i < cards.length; i++)
           Padding(
-            padding: EdgeInsets.only(right: i < cards.length - 1 ? spacing : 0),
-            child: _buildCard(cards[i], i),
+            padding: EdgeInsets.only(right: i < cards.length - 1 ? 2.0 : 0),
+            child: _buildCard(cards[i]),
           ),
       ],
     );
   }
 
-  Widget _buildCard(int cardValue, int index) {
-    // Apply a slight offset for stacked card effect
-    final offset = index * 0.5;
+  Widget _buildCard(int cardValue) {
+    // Card face-down if not showing face up
+    if (!showFaceUp || cardValue == 0) {
+      return Container(
+        width: cardWidth,
+        height: cardHeight,
+        decoration: BoxDecoration(
+          color: Colors.blue.shade800,
+          borderRadius: BorderRadius.circular(3),
+          border: Border.all(color: Colors.white, width: 1),
+        ),
+      );
+    }
 
-    Widget card = Container(
+    // Convert card value to rank and suit
+    final rank = cardValue >> 4;
+    final suit = cardValue & 0x0F;
+
+    // Card face display
+    return Container(
       width: cardWidth,
       height: cardHeight,
-      child: PlayingCardView(
-        card: _convertToPlayingCard(cardValue),
-        showBack: !showFaceUp || cardValue == 0,
-        elevation: enableShadows ? 2.0 : 0.0,
-        shape: RoundedRectangleBorder(
-          borderRadius:
-              BorderRadius.circular(4.0), // Very slight rounding for edges
-          side: BorderSide(color: Colors.black12, width: 0.5),
-        ),
-        style: PlayingCardViewStyle(
-          cardBackgroundColor: Colors.white,
-        ),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(3),
+        border: Border.all(color: Colors.black, width: 1),
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(
+            _rankString(rank),
+            style: TextStyle(
+              color: _suitColor(suit),
+              fontWeight: FontWeight.bold,
+              fontSize: cardWidth * 0.4,
+            ),
+          ),
+          SizedBox(height: cardHeight * 0.05),
+          Text(
+            _suitString(suit),
+            style: TextStyle(
+              color: _suitColor(suit),
+              fontSize: cardWidth * 0.5,
+            ),
+          ),
+        ],
       ),
     );
+  }
 
-    return Transform.translate(
-      offset: Offset(0, offset),
-      child: card,
-    );
+  String _rankString(int rank) {
+    switch (rank) {
+      case 0x02:
+        return '2';
+      case 0x03:
+        return '3';
+      case 0x04:
+        return '4';
+      case 0x05:
+        return '5';
+      case 0x06:
+        return '6';
+      case 0x07:
+        return '7';
+      case 0x08:
+        return '8';
+      case 0x09:
+        return '9';
+      case 0x0A:
+        return '10';
+      case 0x0B:
+        return 'J';
+      case 0x0C:
+        return 'Q';
+      case 0x0D:
+        return 'K';
+      case 0x0E:
+        return 'A';
+      default:
+        return '?';
+    }
+  }
+
+  String _suitString(int suit) {
+    switch (suit) {
+      case 0x04:
+        return '♠';
+      case 0x03:
+        return '♥';
+      case 0x02:
+        return '♣';
+      case 0x01:
+        return '♦';
+      default:
+        return '?';
+    }
+  }
+
+  Color _suitColor(int suit) {
+    // Hearts and diamonds are red, spades and clubs are black
+    return (suit == 0x03 || suit == 0x01) ? Colors.red : Colors.black;
   }
 }
