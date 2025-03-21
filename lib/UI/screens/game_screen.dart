@@ -1,4 +1,3 @@
-// game_screen.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/core_provider.dart';
@@ -8,7 +7,6 @@ import '../widgets/betting_controls.dart';
 import '../widgets/join_dialog.dart';
 import '../../generated/game_service.pbgrpc.dart';
 import 'login_screen.dart';
-import '../widgets/game_controls.dart';
 
 class GameScreen extends ConsumerWidget {
   final int clientId;
@@ -53,9 +51,6 @@ class GameScreen extends ConsumerWidget {
       appBar: AppBar(
         title: const Text('Moon Poker'),
         actions: [
-          // Game controls for admin
-          if (clientId == 1) GameControls(clientId: clientId),
-          const SizedBox(width: 8),
           TextButton.icon(
             icon: const Icon(Icons.logout, color: Colors.white),
             label:
@@ -68,12 +63,10 @@ class GameScreen extends ConsumerWidget {
       ),
       body: Stack(
         children: [
-          // Main table view
           PokerTable(
             gameState: gameState,
             localPlayerId: clientId,
           ),
-
           // Debug panel (temporary - remove for production)
           Positioned(
             top: 50,
@@ -126,11 +119,22 @@ class GameScreen extends ConsumerWidget {
                     style: const TextStyle(color: Colors.white),
                   ),
                   if (isActive)
-                    const Text(
-                      'YOUR TURN!',
-                      style: TextStyle(
-                        color: Colors.yellow,
-                        fontWeight: FontWeight.bold,
+                    // Animate the "YOUR TURN!" text
+                    TweenAnimationBuilder<double>(
+                      tween: Tween<double>(begin: 0.8, end: 1.0),
+                      duration: const Duration(milliseconds: 500),
+                      builder: (context, value, child) {
+                        return Transform.scale(
+                          scale: value,
+                          child: child,
+                        );
+                      },
+                      child: const Text(
+                        'YOUR TURN!',
+                        style: TextStyle(
+                          color: Colors.yellow,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
                 ],
@@ -144,17 +148,19 @@ class GameScreen extends ConsumerWidget {
               left: 0,
               right: 0,
               bottom: 0,
-              child: BettingControls(
-                gameState: gameState,
-                networkController: ref.watch(networkControllerProvider),
-                localPlayerId: clientId,
-                playerStack: isSeated
-                    ? gameState.players
-                        .firstWhere((p) => p.playerId == clientId)
-                        .stack
-                    : 0,
-                isActive:
-                    true, // Always true here since we checked canShowControls
+              child: AnimatedSize(
+                duration: const Duration(milliseconds: 300),
+                child: BettingControls(
+                  gameState: gameState,
+                  networkController: ref.watch(networkControllerProvider),
+                  localPlayerId: clientId,
+                  playerStack: isSeated
+                      ? gameState.players
+                          .firstWhere((p) => p.playerId == clientId)
+                          .stack
+                      : 0,
+                  isActive: true,
+                ),
               ),
             ),
 

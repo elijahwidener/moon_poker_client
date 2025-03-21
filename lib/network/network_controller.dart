@@ -15,17 +15,12 @@ class NetworkController {
   final _errorController = BehaviorSubject<String>();
   bool _isConnected = false;
   int _clientId = 0;
-  int _reconnectionAttempts = 0;
-  static const int _maxReconnectionAttempts = 3;
 
   // Polling related members
   Timer? _pollingTimer;
   int _lastSequenceNumber = 0;
   bool _isPolling = false;
   int _consecutiveErrors = 0;
-  static const Duration _pollingInterval =
-      Duration(milliseconds: 3000); // set long for testing
-  static const Duration _reconnectInterval = Duration(seconds: 3);
   static const int _maxConsecutiveErrors = 3;
 
   // Logger
@@ -160,7 +155,6 @@ class NetworkController {
 
     _isPolling = true;
     _pollGameState();
-    print('Started long polling for game state updates');
   }
 
   /// Stop polling for game state
@@ -168,7 +162,6 @@ class NetworkController {
     _isPolling = false;
     _pollingTimer?.cancel();
     _pollingTimer = null;
-    print('Stopped polling for game state updates');
   }
 
   /// Poll the server for game state
@@ -210,6 +203,12 @@ class NetworkController {
 
       // On error, wait a short time before retrying to avoid rapid failure cycles
       if (_isPolling) {
+        _consecutiveErrors++;
+        if (_consecutiveErrors >= _maxConsecutiveErrors) {
+          _stopPolling();
+          _errorController.add('Too many consecutive errors, stopping polling');
+          return;
+        }
         Timer(Duration(seconds: 2), () => _pollGameState());
       }
     }

@@ -45,8 +45,9 @@ class LobbyService {
       if (maxStakes != null) queryParams['maxStakes'] = maxStakes.toString();
       if (showFull != null) queryParams['showFull'] = showFull.toString();
       if (showEmpty != null) queryParams['showEmpty'] = showEmpty.toString();
-      if (showRunning != null)
+      if (showRunning != null) {
         queryParams['showRunning'] = showRunning.toString();
+      }
 
       // Build request URL
       final uri =

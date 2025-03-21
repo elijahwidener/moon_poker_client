@@ -5,7 +5,6 @@
 // Author: Elijah Widener Ferreira
 // Date: 2025-03-10
 
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../network/lobby_service.dart';
 part 'lobby_service_provider.g.dart';

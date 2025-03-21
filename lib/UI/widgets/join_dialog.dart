@@ -49,7 +49,6 @@ class _JoinTableDialogState extends ConsumerState<JoinTableDialog> {
         Navigator.of(context).pop(); // Close dialog on success
       }
     } catch (e) {
-      print('Join Error: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Failed to join: $e')),

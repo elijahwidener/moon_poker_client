@@ -16,10 +16,10 @@ class CreateGameDialog extends ConsumerStatefulWidget {
   final Function(String gameId) onGameCreated;
 
   const CreateGameDialog({
-    Key? key,
+    super.key,
     required this.clientId,
     required this.onGameCreated,
-  }) : super(key: key);
+  });
 
   @override
   ConsumerState<CreateGameDialog> createState() => _CreateGameDialogState();

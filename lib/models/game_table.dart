@@ -33,10 +33,10 @@ class GameTable {
   });
 
   // Returns formatted stakes string (e.g., "$1/$2")
-  String get stakesString => '\$${smallBlind}/\$${bigBlind}';
+  String get stakesString => '\$$smallBlind/\$$bigBlind';
 
   // Returns formatted buy-in range (e.g., "$100-$200")
-  String get buyInRange => '\$${minBuyIn}-\$${maxBuyIn}';
+  String get buyInRange => '\$$minBuyIn-\$$maxBuyIn';
 
   // Returns player count display (e.g., "3/9")
   String get playerCount => '$seatedPlayers/$maxPlayers';

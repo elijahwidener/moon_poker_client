@@ -79,7 +79,7 @@ class _DealerButtonState extends State<DealerButton> {
           ),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.3),
+              color: Colors.black.withAlpha((0.3 * 255).toInt()),
               blurRadius: 4,
               offset: const Offset(0, 2),
             ),

@@ -15,8 +15,6 @@ bool isActivePlayer(Ref ref, int playerId) {
       .where((p) => p.playerId == playerId)
       .any((p) => p.seatPosition == activePosition);
 
-  print('isActivePlayer($playerId): $result, activePosition: $activePosition');
-
   return result;
 }
 
@@ -36,8 +34,6 @@ bool canShowBettingControls(Ref ref, int playerId) {
   final isActive = ref.watch(isActivePlayerProvider(playerId));
   final gameState = ref.watch(gameStateProvider);
   final uiState = ref.watch(uIStateNotifierProvider);
-  print(
-      'Controls check - Player: $playerId, isActive: $isActive, gameActive: ${gameState.isGameActive}, isLoading: ${uiState.isLoading}');
 
   return isActive && gameState.isGameActive && !uiState.isLoading;
 }

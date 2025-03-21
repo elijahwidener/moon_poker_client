@@ -17,9 +17,9 @@ class LobbyScreen extends ConsumerStatefulWidget {
   final int clientId;
 
   const LobbyScreen({
-    Key? key,
+    super.key,
     required this.clientId,
-  }) : super(key: key);
+  });
 
   @override
   ConsumerState<LobbyScreen> createState() => _LobbyScreenState();
@@ -163,7 +163,7 @@ class _LobbyScreenState extends ConsumerState<LobbyScreen> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Theme.of(context).primaryColor.withOpacity(0.1),
+        color: Theme.of(context).primaryColor.withAlpha((0.1 * 255).toInt()),
         border: Border(
           bottom: BorderSide(
             color: Theme.of(context).dividerColor,
@@ -376,7 +376,7 @@ class _LobbyScreenState extends ConsumerState<LobbyScreen> {
     }
 
     return CircleAvatar(
-      backgroundColor: color.withOpacity(0.2),
+      backgroundColor: color.withAlpha((0.2 * 255).toInt()),
       child: Icon(iconData, color: color),
     );
   }

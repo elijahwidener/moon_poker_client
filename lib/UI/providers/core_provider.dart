@@ -93,16 +93,10 @@ class GameState extends _$GameState {
         state = newState;
         // Reset loading indicator when state changes
         ref.read(uIStateNotifierProvider.notifier).setLoading(false);
-
-        // Debug log for state updates
-        print('Game state updated: active=${newState.isGameActive}, '
-            'pot=${newState.potSize}, '
-            'bet=${newState.currentBet}');
       },
       onError: (error) {
         ref.read(uIStateNotifierProvider.notifier).setError(error.toString());
         ref.read(uIStateNotifierProvider.notifier).setLoading(false);
-        print('Game state update error: $error');
       },
     );
 

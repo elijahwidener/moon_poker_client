@@ -149,7 +149,7 @@ class _BettingControlsState extends State<BettingControls> {
               ),
               const SizedBox(width: 8),
               ActionButton(
-                label: _canCheck ? 'Check' : 'Call \$${_callAmount}',
+                label: _canCheck ? 'Check' : 'Call \$$_callAmount',
                 onPressed: _canCheck || _canCall
                     ? () => _handleAction(
                         _canCheck ? CommandType.CHECK : CommandType.CALL)
@@ -247,7 +247,7 @@ class _BettingControlsState extends State<BettingControls> {
                     data: SliderTheme.of(context).copyWith(
                       activeTrackColor: Colors.blue,
                       thumbColor: Colors.blue,
-                      overlayColor: Colors.blue.withOpacity(0.3),
+                      overlayColor: Colors.blue.withAlpha((0.3 * 255).toInt()),
                       trackHeight: 8,
                     ),
                     child: Column(
@@ -263,10 +263,10 @@ class _BettingControlsState extends State<BettingControls> {
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Text('\$${_minRaise}',
+                              Text('\$$_minRaise',
                                   style: TextStyle(
                                       color: Colors.white70, fontSize: 12)),
-                              Text('\$${_maxRaise}',
+                              Text('\$$_maxRaise',
                                   style: TextStyle(
                                       color: Colors.white70, fontSize: 12)),
                             ],
@@ -318,8 +318,8 @@ class ActionButton extends StatelessWidget {
       onPressed: onPressed,
       style: ElevatedButton.styleFrom(
         backgroundColor: onPressed == null
-            ? Colors.grey.withOpacity(0.3)
-            : (selected ? color : color.withOpacity(0.8)),
+            ? Colors.grey.withAlpha((0.3 * 255).toInt())
+            : (selected ? color : color.withAlpha((0.8 * 255).toInt())),
         minimumSize: const Size(100, 45),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(20),
